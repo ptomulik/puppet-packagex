@@ -221,7 +221,7 @@ it was the case a little bit earlier that `mysql-client` was used by all three
 ports. Shared *portname*s are still used by some other packages, however.
 
 ```console
-~ # `puppet agent -t --debug --trace`
+~ # puppet agent -t --debug --trace
 ...
 Debug: Executing '/usr/local/sbin/portupgrade -N -M BATCH=yes mysql-client'
 ...
@@ -239,7 +239,7 @@ which is certainly not the most recent available version.
 The same case, but with new *packagex* provider yields:
 
 ```console
-~ # `puppet agent -t --debug --trace`
+~ # puppet agent -t --debug --trace
 ...
 Warning: Puppet::Type::Packagex::ProviderPortsx: Found 3 ports named 'mysql-client': 'databases/mysql51-client', 'databases/mysql55-client', 'databases/mysql56-client'. Only 'databases/mysql56-client' will be ensured.
 Debug: Executing '/usr/local/sbin/portupgrade -N -M BATCH=yes databases/mysql56-client'
@@ -424,7 +424,7 @@ obtained from operating system.
 The test case is following (2013.12.1):
 
 * `help2man-1.43.3` is initially installed,
-* new version `help2man-1.43.3` is available in ports tree:
+* new version `help2man-1.43.3_1` is available in ports tree:
 
 ```console
 ~ # portversion -v help2man
@@ -534,11 +534,12 @@ Debug: Executing '/usr/local/sbin/portupgrade -R -M BATCH=yes databases/mysql55-
 ```
 
 Note, that the new *portsx* provider will fail at next transaction (the one
-after successful upgrade). This is because now it's virtually impossible to
-match the outdated portname `mysql-client` to existing ports once the packages
-*portname* changed. The remedy is to use *portorigin*
-`databases/mysql55-client` in *site.pp*. Note, that this helps only for the new
-*portsx* provider (the old still doesn't work due to the `-N` flag issue).
+after successful upgrade). This is because the name `mysql-clients` disappeared
+from both the ports and packages database. The manifest file must be updated to
+reflect change from `mysql-client` to `mysql55-client`. The better option
+through would be to use *portorigin* `databases/mysql55-client` in *site.pp*.
+Note, that this helps only for the new *portsx* provider (the old still doesn't
+work due to the `-N` flag issue).
 
 #### Uninstall fails when there are other packages that depend on this one
 
@@ -569,7 +570,7 @@ subversion-1.8.3
 ```
 
 Now, if we use the new *portsx* provider with appropriate *uninstall_options*,
-it is again able to uninstalls the package (and all the other packages that
+it is again able to uninstall the package (and all the other packages that
 depend on it if needed). For example, one may use `-r` flag if the old *pkg*
 toolstack is used to manage packages:
 
@@ -589,10 +590,6 @@ Notice: /Stage[main]//Node[puppet-test.mgmt.meil.pw.edu.pl]/Packagex[www/apache2
 ...
 Notice: Finished catalog run in 15.09 seconds
 ```
-
-Note that you may disable recursive uninstall by overwritting the
-*uninstall_options* in *site.pp* i.e.  not listing `-r` in options:
-
 
 ## Known incompatibilities
 
