@@ -9,24 +9,24 @@ module Puppet::Util::PTomulik::Packagex::Portsx
 # (searching FreeBSD [ports(7)](http://www.freebsd.org/cgi/man.cgi?query=ports&sektion=7)).
 # The `make search` commands searches available ports (FreeBSDs source packages
 # that may be compiled and installed) and outputs one paragraph (record) per
-# port. The paragraph lines have "Field: value" form. 
+# port. The paragraph lines have "Field: value" form.
 #
 # The assumption is that user first parses record with {PortRecord.parse}
 # and then optionally adds some extra fields/refines the record with {#amend!}.
 # The {#amend!} method "computes" some of the extra fields based on values
 # already present in PortRecord. The `:options` are retrieved from additional
-# sources (from options files in case of *pkg* backend). 
+# sources (from options files in case of *pkg* backend).
 #
 class PortRecord < ::Puppet::Util::PTomulik::Packagex::Portsx::Record
 
   # TODO: write documentation
   def self.std_fields
-    [ 
-      :name,  
-      :path, 
+    [
+      :name,
+      :path,
       :info,
-      :maint, 
-      :cat, 
+      :maint,
+      :cat,
       :bdeps,
       :rdeps,
       :www
@@ -34,7 +34,7 @@ class PortRecord < ::Puppet::Util::PTomulik::Packagex::Portsx::Record
   end
 
   # Fields requested by default from {PortSearch#search_ports}
-  def self.default_fields 
+  def self.default_fields
     [
       :pkgname,
       :portname,

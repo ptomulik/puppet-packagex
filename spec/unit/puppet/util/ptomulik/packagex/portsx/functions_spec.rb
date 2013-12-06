@@ -70,7 +70,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Functions do
     [
       [ 'apache22-2.2.26', '^apache22-2\\.2\\.26$' ],
       [
-        ['php5-5.4.21', 'apache22'], 
+        ['php5-5.4.21', 'apache22'],
         '^(php5-5\\.4\\.21|apache22)$'
       ]
     ].each do |names, result|
@@ -85,8 +85,8 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Functions do
   describe "#portorigin_to_pattern(names)" do
     [
       [ 'www/apache22', '^/usr/ports/www/apache22$' ],
-      [ 
-        ['lang/php5', 'www/apache22'], 
+      [
+        ['lang/php5', 'www/apache22'],
         '^/usr/ports/(lang/php5|www/apache22)$'
       ]
     ].each do |names, result|
@@ -102,7 +102,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Functions do
     [
       [ 'apache22-2.2.26', '^apache22-2\\.2\\.26$' ],
       [
-        ['php5-5.4.21', 'apache22-2.2.26'], 
+        ['php5-5.4.21', 'apache22-2.2.26'],
         '^(php5-5\\.4\\.21|apache22-2\\.2\\.26)$'
       ]
     ].each do |names, result|
@@ -189,8 +189,8 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Functions do
   end
 
   describe "#portorigin?" do
-    [ 
-      'www/apache22', 
+    [
+      'www/apache22',
       'www/apache22-worker-mpm',
       'devel/p5-Locale-gettext',
       'lang/perl5.14',
@@ -201,13 +201,13 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Functions do
         it { test_class.portorigin?(str).should be_true }
       end
     end
-    [ 
+    [
       nil,
       {},
       [],
       '',
       :test,
-      'apache22', 
+      'apache22',
       'apache22-2.2.25',
     ].each do |str|
       context "#portorigin?(#{str.inspect})" do
@@ -241,7 +241,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Functions do
       {},
       [],
       '',
-      'www/apache22', 
+      'www/apache22',
       'apache22',
     ].each do |str|
       context "#pkgname?(#{str.inspect})" do
@@ -275,7 +275,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Functions do
       {},
       [],
       '',
-      'www/apache22', 
+      'www/apache22',
       'bison-2.7.1,1',
     ].each do |str|
       context "#portname?(#{str.inspect})" do
@@ -308,7 +308,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Functions do
   describe "#options_files(portname,portorigin)" do
     [
       [
-        'ruby', 'lang/ruby19', 
+        'ruby', 'lang/ruby19',
         [
           '/var/db/ports/ruby/options',
           '/var/db/ports/ruby/options.local',

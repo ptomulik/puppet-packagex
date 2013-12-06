@@ -15,7 +15,7 @@ TARGET=".tmp/package"
 function do_convert {
   rm -rf "${TARGET}/lib/puppet" "${TARGET}/spec"
   find "${SOURCE}/lib/puppet" "${SOURCE}/spec/unit" "${SOURCE}/spec/fixtures/unit/puppet/util/ptomulik" -type f | grep -v '\.swp$' | while read F; do 
-      F2=$(echo $F | sed -e "s:^${SOURCE}:${TARGET}:" -e 's/\(ptomulik\/\)\?packagex/package/g' -e 's/portsx/ports/g');
+      F2=$(echo $F | sed -e "s:^${SOURCE}:${TARGET}:" -e 's/\(ptomulik\/\)\?packagex/package/g' -e 's/portsx/ports/g' -e 's/unit\/puppet/unit/g');
       D2=$(dirname $F2);
       test -e $D2 || mkdir -p $D2;
       # Some excludes ...
@@ -33,7 +33,8 @@ function do_convert {
       -e 's/PORTSX/PORTS/g' \
       -e 's/Portsx/Ports/g' \
       -e 's/Util::PTomulik/Util/g' \
-      -e 's/util\/ptomulik/util/g'
+      -e 's/util\/ptomulik/util/g' \
+      -e 's/unit\/puppet/unit/g'
 }
 
 (cd $ROOT && do_convert)

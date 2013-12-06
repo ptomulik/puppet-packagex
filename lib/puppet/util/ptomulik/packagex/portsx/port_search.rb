@@ -3,7 +3,7 @@ require 'puppet/util/ptomulik/packagex'
 module Puppet::Util::PTomulik::Packagex::Portsx
 
 # Utilities for searching through FreeBSD ports INDEX (based on `make search`
-# command). 
+# command).
 #
 # Two methods are useful for mortals: {#search_ports} and {#search_ports_by}.
 module PortSearch
@@ -52,7 +52,7 @@ module PortSearch
     if nextnames
       search_ports_by(key, names, fields, options) do |name,rec|
         # this portorigin, pkgname and portname are already seen,
-        nextnames.delete(rec[:pkgname]) 
+        nextnames.delete(rec[:pkgname])
         nextnames.delete(rec[:portname])
         nextnames.delete(rec[:portorigin])
         yield [name,rec]
@@ -98,7 +98,7 @@ module PortSearch
       fields << key
       true
     end
-  
+
     # query in chunks to keep command-line of reasonable length
     values.each_slice(MAKE_SEARCH_MAX_NAMES) do |slice|
       pattern = mk_search_pattern(key,slice)
@@ -126,7 +126,7 @@ module PortSearch
   #
   def execute_make_search(key, pattern, fields=PortRecord.default_fields, options={})
 
-    # We must validate `key` here; `make search` prints error message when key 
+    # We must validate `key` here; `make search` prints error message when key
     # is wrong but exits with 0 (EXIT_SUCCESS), so we have no error indication
     # from make (we use execpipe which mixes stderr and stdout).
     unless PortRecord.search_keys.include?(key)
@@ -172,15 +172,15 @@ module PortSearch
     has_lines = false
     input.each_line do |line|
       if line =~ /^\s*\n?$/
-        yield paragraph if has_lines 
+        yield paragraph if has_lines
         paragraph = ''
         has_lines = false
       else
         paragraph << line
         has_lines = true
       end
-    end 
-    yield paragraph if has_lines 
+    end
+    yield paragraph if has_lines
   end
   private :each_paragraph_of
 end

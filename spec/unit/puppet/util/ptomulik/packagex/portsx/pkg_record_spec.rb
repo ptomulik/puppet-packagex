@@ -1,6 +1,6 @@
 #! /usr/bin/env ruby
 require 'spec_helper'
-require 'puppet/util/ptomulik/packagex/portsx/port_record'
+require 'puppet/util/ptomulik/packagex/portsx/pkg_record'
 
 describe Puppet::Util::PTomulik::Packagex::Portsx::PkgRecord do
 
@@ -51,8 +51,8 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PkgRecord do
       subject { described_class[hash] }
       [
         # 1
-        [ 
-          [:portname, :pkgversion], 
+        [
+          [:portname, :pkgversion],
           {:portname => 'bar', :pkgversion => '0.1.2'}
         ],
         # 2

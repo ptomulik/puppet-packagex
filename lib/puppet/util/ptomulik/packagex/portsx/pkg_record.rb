@@ -21,7 +21,7 @@ class PkgRecord < ::Puppet::Util::PTomulik::Packagex::Portsx::Record
 
   # Default set of fields requested from {PkgSearch#search_packages}
   def self.default_fields
-    [ 
+    [
       :pkgname,
       :portname,
       :portorigin,
@@ -31,7 +31,7 @@ class PkgRecord < ::Puppet::Util::PTomulik::Packagex::Portsx::Record
       :options,
       :options_file,
       :options_files
-    ] 
+    ]
   end
 
   # If we want {#amend!} to add extra fields to PkgRecord we must first

@@ -36,7 +36,7 @@ module PkgSearch
   #
   #
   def search_packages(names=nil, fields=PkgRecord.default_fields, options={})
-    amend = names ? lambda {|r| r[1].amend!(fields)} : 
+    amend = names ? lambda {|r| r[1].amend!(fields)} :
                     lambda {|r| r.amend!(fields)}
     search_fields = PkgRecord.determine_search_fields(fields)
     search_packages_1(names,search_fields,options) do |record|
@@ -61,7 +61,7 @@ module PkgSearch
     # information from portversion command
     records = search_packages_2(names,pass1[0],pass1[1],options)
     if pass2
-      records2 = search_packages_2(names,pass2[0],pass2[1],options) 
+      records2 = search_packages_2(names,pass2[0],pass2[1],options)
       records.zip(records2).each { |r1,r2| merge.call(r1,r2) }
     end
     records.each { |rec | yield rec }
@@ -70,7 +70,7 @@ module PkgSearch
 
   def search_packages_2(names,args,keys,options)
     adapt = names ? lambda { |x| [x[0],PkgRecord[keys.zip(x[1])]] } :
-                    lambda { |x| PkgRecord[keys.zip(x)] } 
+                    lambda { |x| PkgRecord[keys.zip(x)] }
     records = []
     portversion_search(names, args) { |x| records << adapt.call(x) }
     records
@@ -146,7 +146,7 @@ module PkgSearch
 
   # For internal use.
   def determine_portversion_key_check(args)
-    if args.include?('-f') or args.include?('-F') 
+    if args.include?('-f') or args.include?('-F')
       lambda { |s| pkgname?(s) }
     elsif args.include?('-o')
       lambda { |s| portorigin?(s) }
@@ -163,7 +163,7 @@ module PkgSearch
     # so we must do the same with input list to match ones to the others; this
     # is horrible and there are no docs saying that this sorting method is
     # guaranted; for now we just have to live with this uncertainity.
-    names.sort{ |a,b| 
+    names.sort{ |a,b|
       a = a.split('/').last if portorigin?(a)
       b = b.split('/').last if portorigin?(b)
       a <=> b
@@ -187,7 +187,7 @@ module PkgSearch
 
   # Return 'portversion ...' command (as array) to be used with execpipe().
   def portversion_command(args, options)
-    portversion = options[:portversion] || 
+    portversion = options[:portversion] ||
       (self.respond_to?(:command) ? command(:portversion) : 'portversion')
     [portversion, *(args.flatten)]
   end

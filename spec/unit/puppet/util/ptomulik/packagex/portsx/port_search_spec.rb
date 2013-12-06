@@ -154,8 +154,8 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PortSearch do
             with(:portname,portnames,fields,{}).
               multiple_yields(*ports_by_portname)
 
-          expect { |b| 
-            test_class.search_ports(names,fields,&b) 
+          expect { |b|
+            test_class.search_ports(names,fields,&b)
           }.to yield_successive_args(*result)
         end
       end
@@ -313,7 +313,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PortSearch do
         ]
       ]
     ].each do |key, names, fields, search_key, pattern, output, result|
-      context "#search_ports_by(#{key.inspect},#{names.inspect},#{fields.inspect})" do 
+      context "#search_ports_by(#{key.inspect},#{names.inspect},#{fields.inspect})" do
         let(:key) { key }
         let(:names) { names }
         let(:fields) { fields }
@@ -325,8 +325,8 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PortSearch do
           output = output.collect {|o| [o]} # needed by multiple_yields
           test_class.stubs(:execute_make_search).with(search_key,pattern,fields,{}).
             multiple_yields(*output)
-          expect { |b| 
-            test_class.search_ports_by(key,names,fields,&b) 
+          expect { |b|
+            test_class.search_ports_by(key,names,fields,&b)
           }.to yield_successive_args(*result)
         end
       end
@@ -337,14 +337,14 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PortSearch do
     context "#execute_make_search(:baz,'foo')" do
       before(:all) { Puppet::Util::Execution.stubs(:execpipe) }
       it do
-        expect { 
-          test_class.execute_make_search(:baz,'foo') 
+        expect {
+          test_class.execute_make_search(:baz,'foo')
         }.to raise_error ArgumentError, "Invalid search key baz"
       end
     end
     [
       # 1.
-      [ 
+      [
         :name, '^apache22-2.2.26$', [:name,:path,:info,:maint,:www],
         [
           'Port:   apache22-2.2.26',
@@ -366,7 +366,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PortSearch do
         ]
       ],
       # 2.
-      [ 
+      [
         :name,
         "^(apache22|apache22-event-mpm)-#{version_pattern}$",
         [:pkgname, :portorigin, :options_file],
@@ -413,8 +413,8 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PortSearch do
           search_fields = record_class.determine_search_fields(fields,key)
           cmd = test_class.make_search_command(key, pattern,search_fields,{})
           Puppet::Util::Execution.stubs(:execpipe).with(cmd).yields(output)
-          expect { |b| 
-            test_class.execute_make_search(key,pattern,fields,&b) 
+          expect { |b|
+            test_class.execute_make_search(key,pattern,fields,&b)
           }.to yield_successive_args(*result)
         end
       end

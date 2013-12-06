@@ -128,7 +128,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PkgSearch do
                 '/var/db/ports/ruby/options.local',
                 '/var/db/ports/lang_ruby18/options',
                 '/var/db/ports/lang_ruby18/options.local',
-              ], 
+              ],
               :options_file => '/var/db/ports/lang_ruby18/options.local'
             }]
           ],
@@ -141,7 +141,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PkgSearch do
                 '/var/db/ports/ruby/options.local',
                 '/var/db/ports/lang_ruby19/options',
                 '/var/db/ports/lang_ruby19/options.local',
-              ], 
+              ],
               :options_file => '/var/db/ports/lang_ruby19/options.local'
             }]
           ],
@@ -154,7 +154,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PkgSearch do
         let(:out2) { output.collect { |o| [o[1..3]] } }
         let(:out3) { output.collect { |o| [[o[1]]] } }
         let(:result) { result }
-        it { 
+        it {
           args = names  ? test_class.sort_names_for_portversion(names) : []
           test_class.stubs(:execute_portversion).with(%w{-v -F} + args, options).
             multiple_yields(*out1)
@@ -333,8 +333,8 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PkgSearch do
           cmds.each do |cmd,output|
             Puppet::Util::Execution.stubs(:execpipe).with(cmd).yields(output)
           end
-          expect { |b| 
-            test_class.portversion_search(names,args,&b) 
+          expect { |b|
+            test_class.portversion_search(names,args,&b)
           }.to yield_successive_args(*result)
         end
       end
@@ -379,7 +379,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PkgSearch do
   describe "#execute_portversion(args,options={})" do
     [
       # 1.
-      [ 
+      [
         ['-v', '-F'], {},
         ['/usr/local/sbin/portversion', '-v', '-F'],
         [
@@ -392,7 +392,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PkgSearch do
         ]
       ],
       # 2.
-      [ 
+      [
         ['-v', '-F', 'openldap-client', 'apache22', 'foobar-1.2.3'], {},
         ['/usr/local/sbin/portversion', '-v', '-F', 'openldap-client', 'apache22', 'foobar-1.2.3' ],
         [

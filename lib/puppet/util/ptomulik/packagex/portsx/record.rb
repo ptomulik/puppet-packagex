@@ -13,7 +13,7 @@ class Record < ::Hash
   end
 
   # Default set of fields requested from an underlying search method.
-  def self.default_fields 
+  def self.default_fields
     raise NotImplementedError, "this method must be implemented in a subclass"
   end
 
@@ -24,7 +24,7 @@ class Record < ::Hash
   # ensure that we request certain fields from the backend search command.
   # For example, when searching ports with `make search`, one needs to include
   # `:name` field in the `make search` result in order to determine
-  # `:pkgname`, i.e. the search command should be like 
+  # `:pkgname`, i.e. the search command should be like
   #
   #   `make search -C /usr/ports <filter> display=name,...`
   #

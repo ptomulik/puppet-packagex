@@ -1,0 +1,6 @@
+2013-12-06 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+  * release 0.1.0
+  * fixed specs (portsx_spec.rb) to not use global symbols,
+  * fixed converter script to handle some module definitions,
+  * removed unused scripts
+  * removed trailing whitespaces in source files

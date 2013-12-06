@@ -51,7 +51,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Options do
       end
     end
 
-    # parse 
+    # parse
     describe "#parse" do
       [
         ["=FOO\n", {}],
@@ -162,26 +162,26 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Options do
             Dir.expects(:mkdir).never
             FileUtils.expects(:mkdir_p).never
           end
-          it do 
+          it do
             File.stubs(:write)
             expect { subject.save("#{dir}/options") }.to_not raise_error
           end
           it "should call File.write('#{dir}/options',#{str.inspect}) once" do
             File.expects(:write).once.with("#{dir}/options", str).returns 6
-            subject.save("#{dir}/options").should == 6 
+            subject.save("#{dir}/options").should == 6
           end
         end
         context "#save('#{dir}/options', :pkgname => 'foo-1.2.3')" do
           str2 = str
-          str2 += "# Options for foo-1.2.3\n"                        
-          str2 += "_OPTIONS_READ=foo-1.2.3\n"                        
+          str2 += "# Options for foo-1.2.3\n"
+          str2 += "_OPTIONS_READ=foo-1.2.3\n"
           let(:str2) { str2 }
           before(:each) do
             File.stubs(:exists?).with(dir).returns true
             Dir.expects(:mkdir).never
             FileUtils.expects(:mkdir_p).never
           end
-          it do 
+          it do
             File.stubs(:write)
             expect { subject.save("#{dir}/options", :pkgname => 'foo-1.2.3') }.to_not raise_error
           end
@@ -197,10 +197,10 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Options do
             File.stubs(:exists?).with(dir).returns false
             FileUtils.expects(:mkdir_p).never
           end
-          it do 
+          it do
             Dir.stubs(:mkdir)
             File.stubs(:write)
-            expect { subject.save("#{dir}/options") }.to_not raise_error 
+            expect { subject.save("#{dir}/options") }.to_not raise_error
           end
           it "should call Dir.mkdir('#{dir}') and " +
              "then File.write('#{dir}',#{str.inspect})" do
@@ -217,7 +217,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Options do
             File.stubs(:exists?).with(dir).returns false
           end
             Dir.expects(:mkdir).never
-          it { expect { 
+          it { expect {
             FileUtils.stubs(:mkdir_p)
             File.stubs(:write)
             subject.save("#{dir}/options", :mkdir_p => true)

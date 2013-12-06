@@ -54,7 +54,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PortRecord do
       subject { described_class[hash] }
       [
         # 1
-        [ 
+        [
           [:name, :path],
           {:name=>'bar-0.1.2', :path =>'/usr/ports/foo/bar'}
         ],

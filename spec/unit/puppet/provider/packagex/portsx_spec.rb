@@ -9,9 +9,9 @@ provider_class = Puppet::Type.type(:packagex).provider(:portsx)
 
 describe provider_class do
 
-  PkgRecord = Puppet::Util::PTomulik::Packagex::Portsx::PkgRecord
-  PortRecord = Puppet::Util::PTomulik::Packagex::Portsx::PortRecord
-  Options = Puppet::Util::PTomulik::Packagex::Portsx::Options
+  pkgrecord_class = Puppet::Util::PTomulik::Packagex::Portsx::PkgRecord
+  portrecord_class = Puppet::Util::PTomulik::Packagex::Portsx::PortRecord
+  options_class = Puppet::Util::PTomulik::Packagex::Portsx::Options
 
 
   before :each do
@@ -115,14 +115,14 @@ describe provider_class do
       # 1.
       [
         [
-          [ PortRecord[{
+          [ portrecord_class[{
             :pkgname => 'apache22-2.2.26',
             :portname => 'apache22',
             :portorigin => 'www/apache22',
             :pkgversion => '2.2.26',
             :portstatus => '=',
             :portinfo => 'up-to-date with port',
-            :options => Options[ { :SUEXEC => true } ],
+            :options => options_class[ { :SUEXEC => true } ],
             :options_file => '/var/db/ports/www_apache22/options.local',
             :options_files => [
               '/var/db/ports/apache22/options',
@@ -131,14 +131,14 @@ describe provider_class do
               '/var/db/ports/www_apache22/options.local'
             ]
           }]],
-          [PortRecord[{
+          [portrecord_class[{
             :pkgname => 'ruby-1.9.3.484,1',
             :portname => 'ruby',
             :portorigin => 'lang/ruby19',
             :pkgversion => '1.9.3.484,1',
             :portstatus => '=',
             :portinfo => 'up-to-date with port',
-            :options => Options[ ],
+            :options => options_class[ ],
             :options_file => '/var/db/ports/lang_ruby19/options.local',
             :options_files => [
               '/var/db/ports/ruby/options',
@@ -153,7 +153,7 @@ describe provider_class do
             {
               :name => 'www/apache22',
               :ensure => '2.2.26',
-              :build_options => Options[ { :SUEXEC => true } ],
+              :build_options => options_class[ { :SUEXEC => true } ],
               :provider => :portsx
             },
             {
@@ -175,7 +175,7 @@ describe provider_class do
             {
               :name => 'lang/ruby19',
               :ensure => '1.9.3.484,1',
-              :build_options => Options[ {} ],
+              :build_options => options_class[ {} ],
               :provider => :portsx
             },
             {
@@ -230,14 +230,14 @@ describe provider_class do
     # seen such situation once.
     context "when an installed package has multiple origins" do
       let(:records) {[
-        [PkgRecord[{
+        [pkgrecord_class[{
           :pkgname => 'ruby-1.9.3.484,1',
           :portname => 'ruby',
           :portorigin => 'lang/ruby19',
           :pkgversion => '1.9.3.484,1',
           :portstatus => '=',
           :portinfo => 'up-to-date with port',
-          :options => Options[ ],
+          :options => options_class[ ],
           :options_file => '/var/db/ports/lang_ruby19/options.local',
           :options_files => [
             '/var/db/ports/ruby/options',
@@ -246,14 +246,14 @@ describe provider_class do
             '/var/db/ports/lang_ruby19/options.local'
           ]
         }]],
-        [ PkgRecord[{
+        [ pkgrecord_class[{
           :pkgname => 'ruby-1.9.3.484,1',
           :portname => 'ruby',
           :portorigin => 'lang/ruby20',
           :pkgversion => '1.9.3.484,1',
           :portstatus => '=',
           :portinfo => 'up-to-date with port',
-          :options => Options[ ],
+          :options => options_class[ ],
           :options_file => '/var/db/ports/lang_ruby20/options.local',
           :options_files => [
             '/var/db/ports/ruby/options',
@@ -276,13 +276,13 @@ describe provider_class do
     # No ports for an installed package.
     context "when an installed package has multiple origins" do
       let(:records) {[
-        [PkgRecord[{
+        [pkgrecord_class[{
           :pkgname => 'ruby-1.8.7.123,1',
           :portname => 'ruby',
           :pkgversion => '1.8.7.123,1',
           :portstatus => '?',
           :portinfo => 'anything',
-          :options => Options[ ]
+          :options => options_class[ ]
         }]],
       ] }
       it "prints warning but does not raise an error" do
@@ -305,8 +305,8 @@ describe provider_class do
             {:name => 'www/apache22', :ensure => :present},
             {
               :pkgname => 'apache22-2.2.26', :portorigin => 'www/apache22',
-              :portname => 'apache22', :portstatus => '=', 
-              :portinfo => 'up-to-date with port', 
+              :portname => 'apache22', :portstatus => '=',
+              :portinfo => 'up-to-date with port',
               :options_file => '/var/db/ports/www_apache22/options.local',
               :options_files => [
                 '/var/db/ports/apache22/options',
@@ -320,8 +320,8 @@ describe provider_class do
             {:name => 'lang/ruby19', :ensure => :present},
             {
               :pkgname => 'ruby-1.9.3', :portorigin => 'lang/ruby19',
-              :portname => 'ruby', :portstatus => '=', 
-              :portinfo => 'up-to-date with port', 
+              :portname => 'ruby', :portstatus => '=',
+              :portinfo => 'up-to-date with port',
               :options_file => '/var/db/ports/lang_ruby19/options.local',
               :options_files => [
                 '/var/db/ports/ruby/options',
@@ -342,8 +342,8 @@ describe provider_class do
         },
         [ # ports
           [
-            'mysql55-client', 
-            PortRecord[{
+            'mysql55-client',
+            portrecord_class[{
               :pkgname => 'mysql55-client-5.5.3',
               :portname => 'mysql55-client',
               :portorigin => 'databases/mysql55-client',
@@ -358,7 +358,7 @@ describe provider_class do
           ]
         ]
       ],
-    ].each do |instances,packages,ports| 
+    ].each do |instances,packages,ports|
       inst_names = instances.map{|data| data.first[:name]}.join(", ")
       pkg_names = packages.map{|key,pkg| key}.join(", ")
       newpkgs = packages.keys
@@ -438,12 +438,12 @@ describe provider_class do
   describe "#build_options_munge(opts)" do
     [
       { :FOO => true },
-      Options[{ :FOO => true }],
+      options_class[{ :FOO => true }],
     ].each do |opts|
       context "#build_options_munge(#{opts.inspect})" do
         let(:opts) { opts }
         it do
-          subject.build_options_munge(opts).should == Options[opts]
+          subject.build_options_munge(opts).should == options_class[opts]
         end
       end
     end
@@ -452,37 +452,37 @@ describe provider_class do
   describe "#build_options_insync?(should,is)" do
     [
       [
-        Options[{:FOO => true}],
-        Options[{:FOO => true}],
+        options_class[{:FOO => true}],
+        options_class[{:FOO => true}],
         true
       ],
       [
-        Options[{:FOO => true}],
-        Options[{:FOO => false}],
+        options_class[{:FOO => true}],
+        options_class[{:FOO => false}],
         false
       ],
       [
-        Options[{}],
-        Options[{:FOO => false}],
+        options_class[{}],
+        options_class[{:FOO => false}],
         true
       ],
       [
-        Options[{:FOO => true}],
-        Options[{:BAR => false}],
-        false 
+        options_class[{:FOO => true}],
+        options_class[{:BAR => false}],
+        false
       ],
       [
-        Options[{:FOO => true}],
-        Options[{:BAR => false, :FOO => true}],
+        options_class[{:FOO => true}],
+        options_class[{:BAR => false, :FOO => true}],
         true
       ],
       [
         Hash[{:FOO => true}],
-        Options[{:FOO => true}],
+        options_class[{:FOO => true}],
         false
       ],
       [
-        Options[{:FOO => true}],
+        options_class[{:FOO => true}],
         Hash[{:FOO => true}],
         false
       ]
@@ -498,12 +498,12 @@ describe provider_class do
 
   describe "#build_options_should_to_s(should, newvalue)" do
     [
-      [{},Options[{:FOO => true}]],
+      [{},options_class[{:FOO => true}]],
       [{},{:FOO => true}]
     ].each do |should,newvalue|
       let(:should) { should }
       let(:newvalue) { newvalue }
-      let(:result) { newvalue.is_a?(Options) ? Options[newvalue.sort].inspect : newvalue.inspect }
+      let(:result) { newvalue.is_a?(options_class) ? options_class[newvalue.sort].inspect : newvalue.inspect }
       context "#build_options_should_to_s(#{should.inspect}, #{newvalue.inspect})" do
         it { subject.build_options_should_to_s(should,newvalue).should == result}
       end
@@ -513,10 +513,10 @@ describe provider_class do
   describe "#build_options_is_to_s(should, currvalue)" do
     [
       [{},{},"{}"],
-      [Options[{}],Options[{:FOO => true}], "{}"],
-      [Options[{:FOO => true}],Options[{}], "{}"],
-      [Options[{:FOO => true,:BAR => false}],Options[{:BAR => true}],
-       Options[{:BAR=>true}].inspect],
+      [options_class[{}],options_class[{:FOO => true}], "{}"],
+      [options_class[{:FOO => true}],options_class[{}], "{}"],
+      [options_class[{:FOO => true,:BAR => false}],options_class[{:BAR => true}],
+       options_class[{:BAR=>true}].inspect],
     ].each do |should,currvalue,result|
       let(:should) { should }
       let(:currvalue) { currvalue }
@@ -529,15 +529,15 @@ describe provider_class do
 
   describe "#build_options" do
     it do
-      subject.stubs(:properties).once.returns({:build_options => Options[{}]})
-      subject.build_options.should == Options[{}]
+      subject.stubs(:properties).once.returns({:build_options => options_class[{}]})
+      subject.build_options.should == options_class[{}]
     end
   end
 
   describe "#build_options=(opts)" do
     it do
-      subject.stubs(:reinstall).once.with(Options[{:FOO => true}])
-      expect { subject.build_options=Options[{:FOO => true}] }.to_not raise_error
+      subject.stubs(:reinstall).once.with(options_class[{:FOO => true}])
+      expect { subject.build_options=options_class[{:FOO => true}] }.to_not raise_error
     end
   end
 
@@ -572,9 +572,9 @@ describe provider_class do
   describe "when installing" do
     context "and portupgrade is supposed to succeed" do
       before :each do
-        ops =  Options[{:FOO => true}]
+        ops =  options_class[{:FOO => true}]
         ops.stubs(:save).once.with('/var/db/ports/bar_foo/options.local', {:pkgname => 'foo-1.2.3'})
-        subject.stubs(:properties).returns({:build_options => Options[{:FOO => false}]})
+        subject.stubs(:properties).returns({:build_options => options_class[{:FOO => false}]})
         subject.stubs(:resource).returns({:name => 'bar/foo', :build_options => ops})
         subject.stubs(:options_file).returns('/var/db/ports/bar_foo/options.local')
         subject.stubs(:pkgname).returns('foo-1.2.3')
@@ -588,8 +588,8 @@ describe provider_class do
 
     context "and portupgrade fails" do
       it "should revert options and reraise" do
-        opts1 = Options[{:FOO=>true}]
-        opts2 = Options[{:FOO=>false}]
+        opts1 = options_class[{:FOO=>true}]
+        opts2 = options_class[{:FOO=>false}]
         opts1.stubs(:save).once.with('/var/db/ports/bar_foo/options.local', {:pkgname => 'foo-2.4.5'})
         opts2.stubs(:save).once.with('/var/db/ports/bar_foo/options.local', {:pkgname => 'foo-2.4.5'})
         subject.stubs(:pkgname).returns('foo-2.4.5')
@@ -602,8 +602,8 @@ describe provider_class do
     end
     context "and there is no such package" do
       it "should revert options and raise exception" do
-        opts1 = Options[{:FOO=>true}]
-        opts2 = Options[{:FOO=>false}]
+        opts1 = options_class[{:FOO=>true}]
+        opts2 = options_class[{:FOO=>false}]
         opts1.stubs(:save).once.with('/var/db/ports/bar_foo/options.local', {:pkgname => 'foo-2.4.5'})
         opts2.stubs(:save).once.with('/var/db/ports/bar_foo/options.local', {:pkgname => 'foo-2.4.5'})
         subject.stubs(:pkgname).returns('foo-2.4.5')
@@ -699,16 +699,16 @@ describe provider_class do
       [
         { :name => 'bar/foo', :ensure=>:absent },
         [
-          { 
-            :name => 'geez/noop', 
+          {
+            :name => 'geez/noop',
             :ensure=>'1.2.3',
             :portorigin => 'geez/foo',
             :pkgname => 'foo-1.2.3',
-            :portname => 'foo' 
+            :portname => 'foo'
           },
           {
             :name => 'ding/dong',
-            :ensure=>'4.5.6', 
+            :ensure=>'4.5.6',
             :portorigin => 'ding/dong',
             :pkgname => 'dong-4.5.6',
             :portname => 'dong'
@@ -719,16 +719,16 @@ describe provider_class do
       [
         { :name => 'bar/foo', :ensure=>:absent },
         [
-          { 
-            :name => 'geez/noop', 
+          {
+            :name => 'geez/noop',
             :ensure=>'1.2.3',
             :portorigin => 'geez/foo',
             :pkgname => 'foo-1.2.3',
-            :portname => 'foo' 
+            :portname => 'foo'
           },
           {
             :name => 'gadong',
-            :ensure=>'4.5.6', 
+            :ensure=>'4.5.6',
             :portorigin => 'bar/foo',
             :pkgname => 'foo-4.5.6',
             :portname => 'foo'

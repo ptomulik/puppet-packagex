@@ -57,7 +57,7 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
   require 'puppet/util/ptomulik/packagex/portsx/options'
   extend Puppet::Util::PTomulik::Packagex::Portsx
 
-  # note, portsdir and port_dbdir are defined in module 
+  # note, portsdir and port_dbdir are defined in module
   # Puppet::Util::PTomulik::Packagex::Portsx
   confine :exists => [ self.portsdir, self.port_dbdir ]
 
@@ -76,9 +76,9 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
       if (len = recs.length) > 0
         rec = recs.last
         if len > 1
-          # in theory this should never happen, but it's better to know 
+          # in theory this should never happen, but it's better to know
           warning "Found #{len} installed ports named '#{pkgname}': " +
-            "#{recs.map{|r| "'#{r[:portorigin]}'"}.join(', ')}. " + 
+            "#{recs.map{|r| "'#{r[:portorigin]}'"}.join(', ')}. " +
             "Only '#{rec[:portorigin]}' will be processed."
         end
         package = new({
@@ -101,10 +101,10 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
     # already installed packages
     newpkgs = packages.keys
     instances.each do |prov|
-      if pkg = (packages[prov.name] || packages[prov.portorigin] || 
+      if pkg = (packages[prov.name] || packages[prov.portorigin] ||
                 packages[prov.pkgname] || packages[prov.portname])
         newpkgs -= [prov.name, prov.portorigin, prov.pkgname, prov.portname]
-        pkg.provider = prov 
+        pkg.provider = prov
       end
     end
     # we prefetch also not installed ports to save time; this way we perform
@@ -116,7 +116,7 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
   end
 
   self::PORT_ATTRIBUTES = [
-    :pkgname, 
+    :pkgname,
     :portorigin,
     :portname,
     :portstatus,
@@ -194,7 +194,7 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
   def build_options_is_to_s(should, currentvalue)
     if currentvalue.is_a?(Puppet::Util::PTomulik::Packagex::Portsx::Options)
       hash = currentvalue.select{|k,v| should.keys.include? k}.sort
-      Puppet::Util::PTomulik::Packagex::Portsx::Options[hash].inspect 
+      Puppet::Util::PTomulik::Packagex::Portsx::Options[hash].inspect
     else
       currentvalue.inspect
     end
@@ -269,11 +269,11 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
   def upgrade_options
     ops = resource[:install_options]
     # We always remove -N from command line, as this flag breaks the upgrade
-    # procedure (-N indicates that one wants to install package which is not 
+    # procedure (-N indicates that one wants to install package which is not
     # currently installed, or to skip installation if it's installed; the
     # upgrade method is invoked on already installed packages only).
     # We always remove -f from command line, as the upgrade procedure shouldn't
-    # depend on it (upgrade should only be used to install newer versions, 
+    # depend on it (upgrade should only be used to install newer versions,
     # which must work without -f)
     prepare_options(ops, self.class::DEFAULT_UPGRADE_OPTIONS, %w{}, %w{-f -N})
   end
@@ -384,7 +384,7 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
         "ports database, the port directory actually exists, but the latest " +
         "version number cannot be obtained."
     when '#'
-      warning "The installed package #{pkgname} does not have an origin recorded." 
+      warning "The installed package #{pkgname} does not have an origin recorded."
     else
       warning "Invalid status flag '#{portstatus}' for package " +
         "#{pkgname} (returned by portversion command)."

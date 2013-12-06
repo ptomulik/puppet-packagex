@@ -3,7 +3,7 @@ require 'fileutils'
 
 module Puppet::Util::PTomulik::Packagex::Portsx
 
-  class Options 
+  class Options
 
     # Module from ptomulik/vash puppet plugin
     require 'puppet/util/ptomulik/vash/contained'
@@ -66,7 +66,7 @@ module Puppet::Util::PTomulik::Packagex::Portsx
       contents = []
       files.each do|file|
         next if (not File.exists?(file)) and not params[:all]
-        msg = "Reading port options from '#{file}'" 
+        msg = "Reading port options from '#{file}'"
         respond_to?(:debug) ? debug(msg) : Puppet.debug(msg)
         contents << File.read(file)
       end
@@ -95,22 +95,22 @@ module Puppet::Util::PTomulik::Packagex::Portsx
     # @option params pkgname package name to which the options apply
     # @option params mkdir_p create directory recursively if don't exist, if
     #         `false`, only last level subdirectory is allowed to be created
-    # 
+    #
     # @note by default we do not allow to create directories recursivelly;
     #       we assume, that '/var/db/ports' already exists and user saves
-    #       its options to '/var/db/ports/my_port/options'; 
+    #       its options to '/var/db/ports/my_port/options';
     def save(file,params={})
       dir = File.dirname(file)
-      if not File.exists?(dir) 
+      if not File.exists?(dir)
         msg = "Creating directory #{dir}"
         respond_to?(:debug) ? debug(msg) : Puppet.debug(msg)
         params[:mkdir_p] ?  FileUtils.mkdir_p(dir) : Dir.mkdir(dir)
       end
-      msg = params[:pkgname] ? 
+      msg = params[:pkgname] ?
         "Saving options for '#{params[:pkgname]}' port to file '#{file}'" :
         "Saving port options to file '#{file}'"
       respond_to?(:debug) ? debug(msg) : Puppet.debug(msg)
-      File.write(file,generate(params)) 
+      File.write(file,generate(params))
     end
 
   end

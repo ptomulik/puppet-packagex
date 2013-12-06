@@ -32,7 +32,7 @@ require 'puppet/util/ptomulik/packagex/portsx/pkg_search'
 #    undistinguishable by the portname.
 # 3. Port `'lang/perl5.14'` exists (*portname* == `'perl'`) and its `Makefile`
 #    sets PKGNAMESUFFIX=`'threaded'`. When installed, the resulting package is
-#    named `'perl-threaded-5.14.4'`. 
+#    named `'perl-threaded-5.14.4'`.
 # 4. The basename of port may change. For example, it happened to me with the
 #    `mysql-client` package, which was "upgraded" to `mysql55-client`.
 #

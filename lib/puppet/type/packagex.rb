@@ -60,7 +60,7 @@ module Puppet
       for the given package. The meaning and format of the options is defined
       by provider.",
       :methods => [:build_options_insync?, :build_options, :build_options=]
-      
+
 
     ensurable do
       desc <<-EOT
@@ -69,7 +69,7 @@ module Puppet
         retrieve by specifying a version number or `latest` as the ensure
         value. On packaging systems that manage configuration files separately
         from "normal" system files, you can uninstall config files by
-        specifying `purged` as the ensure value.
+        specifying `purged` as the ensure value. This defaults to `installed`.
       EOT
 
       attr_accessor :latest
@@ -236,12 +236,18 @@ module Puppet
 
       "
       isnamevar
+
+      validate do |value|
+        if !value.is_a?(String)
+          raise ArgumentError, "Name must be a String not #{value.class}"
+        end
+      end
     end
 
     newproperty(:build_options, :required_features=>:build_options) do
       desc "Build options. The definition of build options is provider
         specific. In general, these are certain properties which alter contents
-        of a package being installed. An example of build options are the 
+        of a package being installed. An example of build options are the
         FreeBSD ports options.
 
         The build_options attribute is a property. This means that the options
@@ -289,7 +295,7 @@ module Puppet
         if provider.respond_to?(:build_options_should_to_s)
           provider.build_options_should_to_s(should, newvalue)
         else
-          super 
+          super
         end
       end
 

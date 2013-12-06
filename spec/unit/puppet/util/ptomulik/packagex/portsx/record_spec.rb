@@ -8,7 +8,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Record do
 
   describe "::std_fields" do
     it do
-      expect { described_class.std_fields }.to raise_error NotImplementedError, 
+      expect { described_class.std_fields }.to raise_error NotImplementedError,
         "this method must be implemented in a subclass"
     end
   end
@@ -35,7 +35,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Record do
           let(:fields) { [:pkgname, :portname, :portorigin] }
           it "calls #amend!([:pkgname, :portname, :portorigin]) once" do
             described_class.any_instance.expects(:amend!).once.with(fields)
-            expect { subject.amend(fields)}.to_not raise_error 
+            expect { subject.amend(fields)}.to_not raise_error
           end
           it "returns an instance of #{described_class.to_s}" do
             subject.amend(fields).should be_instance_of described_class
@@ -55,9 +55,9 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Record do
       subject { described_class[hash] }
       [
         # 1
-        [ 
+        [
           [:options_files],
-          { 
+          {
             :options_files => [
               '/var/db/ports/bar/options',
               '/var/db/ports/bar/options.local',
