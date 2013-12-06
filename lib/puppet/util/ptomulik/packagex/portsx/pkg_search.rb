@@ -60,7 +60,7 @@ module PkgSearch
     # find installed packages, retrieve port status (<,=,>) and additional
     # information from portversion command
     records = search_packages_2(names,pass1[0],pass1[1],options)
-    if pass2
+    if pass2 and not records.empty?
       records2 = search_packages_2(names,pass2[0],pass2[1],options)
       records.zip(records2).each { |r1,r2| merge.call(r1,r2) }
     end
@@ -130,9 +130,9 @@ module PkgSearch
     execute_portversion(args + slice, options) {|fields| results << fields}
     # we expect one valid output line for one input name in slice, if
     # numbers doesn't agree, then something went wrong
-    if slice.length == results.length
+    if (slice.length == results.length)
       slice.zip(results).each { |pair| yield pair }
-    else
+    elsif (results.length > 0)
       slice.each do |name|
         # Invoke portversion for each of the failed packages individually
         # (actually for each package from failed slices).

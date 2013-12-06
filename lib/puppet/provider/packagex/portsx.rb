@@ -61,10 +61,10 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
   # Puppet::Util::PTomulik::Packagex::Portsx
   confine :exists => [ self.portsdir, self.port_dbdir ]
 
-  def self.instances
+  def self.instances(names=nil)
     records = {}
     # find installed packages
-    search_packages do |record|
+    search_packages(names) do |record|
       records[record[:pkgname]] ||= Array.new
       if record[:portorigin] and ['<','=','>'].include?(record[:portstatus])
         records[record[:pkgname]] << record
@@ -394,12 +394,8 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
 
   def query
     # support names, portorigin, pkgname and portname
-    self.class.instances.each do |inst|
-      if [inst.name,inst.portorigin,inst.pkgname,inst.portname].include?(name)
-        return inst.properties
-      end
-    end
-
-    nil
+    props = nil
+    self.class.instances([name]).each { |inst| props = inst.properties }
+    props
   end
 end

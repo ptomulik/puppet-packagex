@@ -200,7 +200,7 @@ describe provider_class do
         let(:records) { records }
         let(:output) { output }
         before(:each) do
-          described_class.stubs(:search_packages).once.with().multiple_yields(*records)
+          described_class.stubs(:search_packages).once.with(nil).multiple_yields(*records)
         end
         (1..records.length-1).each do |i|
           record = records[i][0]
@@ -264,7 +264,7 @@ describe provider_class do
         }]]
       ] }
       it "prints warning but does not raises an error" do
-        described_class.stubs(:search_packages).once.with().multiple_yields(*records)
+        described_class.stubs(:search_packages).once.with(nil).multiple_yields(*records)
         described_class.stubs(:warning).once.with(
           "Found 2 installed ports named 'ruby-1.9.3.484,1': 'lang/ruby19', " +
           "'lang/ruby20'. Only 'lang/ruby20' will be processed."
@@ -286,7 +286,7 @@ describe provider_class do
         }]],
       ] }
       it "prints warning but does not raise an error" do
-        described_class.stubs(:search_packages).once.with().multiple_yields(*records)
+        described_class.stubs(:search_packages).once.with(nil).multiple_yields(*records)
         described_class.stubs(:warning).once.with(
           "Could not find port for installed package 'ruby-1.8.7.123,1'." +
           "Build options will not work for this package."
@@ -696,36 +696,17 @@ describe provider_class do
 
   describe "#query" do
     [
+      # 1.
       [
         { :name => 'bar/foo', :ensure=>:absent },
         [
-          {
-            :name => 'geez/noop',
-            :ensure=>'1.2.3',
-            :portorigin => 'geez/foo',
-            :pkgname => 'foo-1.2.3',
-            :portname => 'foo'
-          },
-          {
-            :name => 'ding/dong',
-            :ensure=>'4.5.6',
-            :portorigin => 'ding/dong',
-            :pkgname => 'dong-4.5.6',
-            :portname => 'dong'
-          },
         ],
         nil
       ],
+      # 2.
       [
         { :name => 'bar/foo', :ensure=>:absent },
         [
-          {
-            :name => 'geez/noop',
-            :ensure=>'1.2.3',
-            :portorigin => 'geez/foo',
-            :pkgname => 'foo-1.2.3',
-            :portname => 'foo'
-          },
           {
             :name => 'gadong',
             :ensure=>'4.5.6',
@@ -734,25 +715,48 @@ describe provider_class do
             :portname => 'foo'
           },
         ],
+        0
+      ],
+      # 3.
+      [
+        { :name => 'ruby', :ensure=>:absent },
+        [
+          {
+            :name => 'lang/ruby18',
+            :ensure=>'1.8.7',
+            :portorigin => 'lang/ruby18',
+            :pkgname => 'ruby-1.8.7',
+            :portname => 'ruby'
+          },
+          {
+            :name => 'lang/ruby19',
+            :ensure=>'1.9.3',
+            :portorigin => 'lang/ruby19',
+            :pkgname => 'ruby-1.9.3',
+            :portname => 'ruby'
+          },
+        ],
         1
       ],
     ].each do |me,others,result|
-      subject { described_class.new(me) }
-      let(:me) { me }
-      let(:others) { others }
-      let(:result) { result }
-      it do
-        instances = []
-        others.each do |o|
-          inst = described_class.new({:name => o[:name], :ensure => o[:ensure]})
-          o.delete(:name)
-          o.delete(:ensure)
-          inst.assign_port_attributes(o)
-          instances << inst
+      context "#{me.inspect}.query" do
+        subject { described_class.new(me) }
+        let(:me) { me }
+        let(:others) { others }
+        let(:result) { result }
+        it do
+          instances = []
+          others.each do |o|
+            inst = described_class.new({:name => o[:name], :ensure => o[:ensure]})
+            o.delete(:name)
+            o.delete(:ensure)
+            inst.assign_port_attributes(o)
+            instances << inst
+          end
+          result = instances[result].properties if result
+          described_class.stubs(:instances).once.with([me[:name]]).returns instances
+          subject.query.should == result
         end
-        result = instances[result].properties if result
-        described_class.stubs(:instances).returns instances
-        subject.query.should == result
       end
     end
   end
