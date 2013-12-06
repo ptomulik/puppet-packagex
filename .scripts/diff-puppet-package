@@ -1,0 +1,24 @@
+#! /bin/sh
+
+set -e
+
+# show diff between original puppet 
+
+if [ $# -lt 1 ]; then
+  echo "error: missing argument" >&2
+  echo "syntax:" >&2
+  echo "  $0 dir/to/puppet/source" >&2
+  exit 1
+fi
+
+ROOT=$(readlink -f "$(dirname $0)/..")
+SOURCE=$(readlink -ef $1)
+TARGET=".tmp/package"
+
+function showdiff {
+  find  -type f | grep -v '\.swp$' | sed -e 's:^\.\/::'| while read F; do
+    diff -uN "$1/$F" $F | sed -e "s:^--- ${SOURCE}/:--- :" || true
+  done
+}
+
+(cd $ROOT/${TARGET} && showdiff ${SOURCE})
