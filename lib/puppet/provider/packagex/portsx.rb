@@ -394,8 +394,6 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
 
   def query
     # support names, portorigin, pkgname and portname
-    props = nil
-    self.class.instances([name]).each { |inst| props = inst.properties }
-    props
+    (inst = self.class.instances([name]).last) ? inst.properties : nil
   end
 end
