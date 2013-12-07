@@ -1,4 +1,5 @@
 2013-12-06 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+  * release 0.1.2
   * optimized prefetch() method
   * cosmetic changes to query()
   * release 0.1.1
