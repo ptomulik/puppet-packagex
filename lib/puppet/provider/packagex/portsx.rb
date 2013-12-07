@@ -108,10 +108,12 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
       end
     end
     # we prefetch also not installed ports to save time; this way we perform
-    # only three calls to `make search` (for up to 60 packages) instead of 3xN
-    # calls (for N packages) later
+    # only two or three calls to `make search` (for up to 60 packages) instead
+    # of 3xN calls (in query()) for N packages
     search_ports(newpkgs) do |name,record|
-      packages[name].provider.assign_port_attributes(record)
+      prov = new({:name => record[:portorigin], :ensure => :absent})
+      prov.assign_port_attributes(record)
+      packages[name].provider = prov
     end
   end
 
