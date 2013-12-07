@@ -1,5 +1,8 @@
-2013-12-06 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+2013-12-08 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+  * release 0.1.4
+2013-12-07 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
   * fixed specs in util/ptomulik/packagex/portsx/options_spec.rb
+2013-12-06 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
   * release 0.1.2
   * optimized prefetch() method
   * cosmetic changes to query()
