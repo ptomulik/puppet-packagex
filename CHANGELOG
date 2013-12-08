@@ -1,4 +1,5 @@
 2013-12-08 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+  * release 0.1.5
   * modified portsx such that it also handles packages having no port origin
   * release 0.1.4
 2013-12-07 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
