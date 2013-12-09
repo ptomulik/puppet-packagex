@@ -70,30 +70,23 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
     end
     # create provider instances
     packages = []
-    records.each do |pkgname, recs|
-        rec = recs.last
-        if (len = recs.length) > 1
-          # in theory this should never happen, but it's better to know
-          warning "Found #{len} installed ports named '#{pkgname}': " +
-            "#{recs.map{|r| "'#{r[:portorigin]}'"}.join(', ')}. " +
-            "Only '#{rec[:portorigin]}' will be processed."
-        end
-        unless rec[:portorigin] and ['<','=','>'].include?(rec[:portstatus])
-          rec.delete(:portorigin) if rec[:portorigin]
-          warning "Could not find port for installed package '#{pkgname}'." +
-                  "Build options and upgrades will not work for this package."
-        end
-        # if portorigin is unavailable, use pkgname to identify the package,
-        # this allows to at least uninstall packages that are currently
-        # installed but their ports were removed from ports tree
-        package = new({
-          :name => rec[:portorigin] || rec[:pkgname],
-          :ensure => rec[:pkgversion],
-          :build_options => rec[:options],
-          :provider => self.name
-        })
-        package.assign_port_attributes(rec)
-        packages << package
+    with_unique('installed ports', records) do |pkgname,record|
+      unless record[:portorigin] and ['<','=','>'].include?(record[:portstatus])
+        record.delete(:portorigin) if record[:portorigin]
+        warning "Could not find port for installed package '#{pkgname}'." +
+                "Build options and upgrades will not work for this package."
+      end
+      # if portorigin is unavailable, use pkgname to identify the package,
+      # this allows to at least uninstall packages that are currently
+      # installed but their ports were removed from ports tree
+      package = new({
+        :name => record[:portorigin] || record[:pkgname],
+        :ensure => record[:pkgversion],
+        :build_options => record[:options],
+        :provider => self.name
+      })
+      package.assign_port_attributes(record)
+      packages << package
     end
     packages
   end
@@ -111,12 +104,30 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
     # we prefetch also not installed ports to save time; this way we perform
     # only two or three calls to `make search` (for up to 60 packages) instead
     # of 3xN calls (in query()) for N packages
+    records = {}
     search_ports(newpkgs) do |name,record|
+      records[name] ||= []
+      records[name] << record
+    end
+    with_unique('ports', records) do |name,record|
       prov = new({:name => record[:portorigin], :ensure => :absent})
       prov.assign_port_attributes(record)
       packages[name].provider = prov
     end
   end
+
+  def self.with_unique(what, records)
+    records.each do |name,array|
+      record = array.last
+      if (len = array.length) > 1
+        warning "Found #{len} #{what} named '#{name}': " +
+          "#{array.map{|r| "'#{r[:portorigin]}'"}.join(', ')}. " +
+          "Only '#{record[:portorigin]}' will be ensured."
+      end
+      yield name, record
+    end
+  end
+  private_class_method :with_unique
 
   self::PORT_ATTRIBUTES = [
     :pkgname,

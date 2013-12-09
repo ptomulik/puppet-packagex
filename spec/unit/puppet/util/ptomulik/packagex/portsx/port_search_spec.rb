@@ -335,7 +335,7 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::PortSearch do
 
   describe "#execute_make_search(key,pattern,fields=PORT_SEARCH_FIELDS,options={})" do
     context "#execute_make_search(:baz,'foo')" do
-      before(:all) { Puppet::Util::Execution.stubs(:execpipe) }
+      before(:each) { Puppet::Util::Execution.stubs(:execpipe) }
       it do
         expect {
           test_class.execute_make_search(:baz,'foo')

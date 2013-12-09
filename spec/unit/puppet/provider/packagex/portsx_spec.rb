@@ -13,7 +13,6 @@ describe provider_class do
   portrecord_class = Puppet::Util::PTomulik::Packagex::Portsx::PortRecord
   options_class = Puppet::Util::PTomulik::Packagex::Portsx::Options
 
-
   before :each do
     # Create a mock resource
     @resource = stub 'resource'
@@ -267,7 +266,7 @@ describe provider_class do
         described_class.stubs(:search_packages).once.with(nil).multiple_yields(*records)
         described_class.stubs(:warning).once.with(
           "Found 2 installed ports named 'ruby-1.9.3.484,1': 'lang/ruby19', " +
-          "'lang/ruby20'. Only 'lang/ruby20' will be processed."
+          "'lang/ruby20'. Only 'lang/ruby20' will be ensured."
         )
         expect { described_class.instances }.to_not raise_error
       end
@@ -347,12 +346,12 @@ describe provider_class do
               :pkgname => 'mysql55-client-5.5.3',
               :portname => 'mysql55-client',
               :portorigin => 'databases/mysql55-client',
-              :options_file => '/var/db/ports/lang_ruby20/options.local',
+              :options_file => '/var/db/ports/databases_mysql55-client/options.local',
               :options_files => [
-                '/var/db/ports/ruby/options',
-                '/var/db/ports/ruby/options.local',
-                '/var/db/ports/lang_ruby20/options',
-                '/var/db/ports/lang_ruby20/options.local'
+                '/var/db/ports/mysql-client/options',
+                '/var/db/ports/mysql-client/options.local',
+                '/var/db/ports/databases_mysql55-client/options',
+                '/var/db/ports/databases_mysql55-client/options.local'
               ]
             }]
           ]
@@ -388,6 +387,74 @@ describe provider_class do
         it do
           expect { described_class.prefetch(packages) }.to_not raise_error
         end
+      end
+    end
+    context "when an ambiguous port name is used in manifest for uninstalled port" do 
+      ports = [
+        [
+          'mysql-client',
+          portrecord_class[{
+            :pkgname => 'mysql-client-5.1.71',
+            :portname => 'mysql-client',
+            :portorigin => 'databases/mysql51-client',
+            :options_file => '/var/db/ports/databases_mysql51-client/options.local',
+            :options_files => [
+              '/var/db/ports/mysql-client/options',
+              '/var/db/ports/mysql-client/options.local',
+              '/var/db/ports/databases_mysql51-client/options',
+              '/var/db/ports/databases_mysql51-client/options.local'
+            ]
+          }],
+        ],
+        [
+          'mysql-client',
+          portrecord_class[{
+            :pkgname => 'mysql-client-5.5.33',
+            :portname => 'mysql-client',
+            :portorigin => 'databases/mysql55-client',
+            :options_file => '/var/db/ports/databases_mysql55-client/options.local',
+            :options_files => [
+              '/var/db/ports/mysql-client/options',
+              '/var/db/ports/mysql-client/options.local',
+              '/var/db/ports/databases_mysql55-client/options',
+              '/var/db/ports/databases_mysql55-client/options.local'
+            ]
+          }],
+        ],
+        [
+          'mysql-client',
+          portrecord_class[{
+            :pkgname => 'mysql-client-5.6.13',
+            :portname => 'mysql-client',
+            :portorigin => 'databases/mysql56-client',
+            :options_file => '/var/db/ports/databases_mysql56-client/options.local',
+            :options_files => [
+              '/var/db/ports/mysql-client/options',
+              '/var/db/ports/mysql-client/options.local',
+              '/var/db/ports/databases_mysql56-client/options',
+              '/var/db/ports/databases_mysql56-client/options.local'
+            ]
+          }]
+        ]
+      ]
+      resources = {
+        'mysql-client' => Puppet::Type.type(:packagex).new({
+          :name => 'mysql-client', :ensure=>'present'
+        })
+      }
+      before(:each) do
+        described_class.stubs(:instances).returns([])
+        described_class.stubs(:search_ports).with(['mysql-client']).multiple_yields(*ports)
+      end
+      let(:ports) { ports }
+      let(:resources) { resources }
+      it do
+        described_class.expects(:warning).once.with(
+          "Found 3 ports named 'mysql-client': 'databases/mysql51-client', " +
+          "'databases/mysql55-client', 'databases/mysql56-client'. Only " +
+          "'databases/mysql56-client' will be ensured."
+        )
+        described_class.prefetch(resources)
       end
     end
   end
