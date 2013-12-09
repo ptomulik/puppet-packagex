@@ -1,4 +1,5 @@
 2013-12-09 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+  * release 0.1.6
   * fixed prefetch() to pickup unique portorigin as said in README.md
 2013-12-08 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
   * release 0.1.5
