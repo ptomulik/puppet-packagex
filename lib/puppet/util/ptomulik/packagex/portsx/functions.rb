@@ -122,5 +122,33 @@ module Functions
         [f,"#{f}.local"]
       }.flatten
   end
+
+  def pkgng_active?(options = {})
+    return @pkgng_active unless @pkgng_active.nil?
+
+    pkg = options[:pkg] || (respond_to?(:command) ? command(:pkg) : nil)
+    # Detect whether the OS uses old pkg or the new pkgng.
+    @pkgng_active = false
+    if pkg and FileTest.file?(pkg) and FileTest.executable?(pkg)
+      ::Puppet.debug "'#{pkg}' command found, checking whether pkgng is active"
+      env = { 'TMPDIR' => '/dev/null', 'ASSUME_ALWAYS_YES' => '1',
+              'PACKAGESITE' => 'file:///nonexistent' }
+      Puppet::Util.withenv(env) do 
+        begin
+          # this is technique proposed by pkg(8) man page,
+          cmd = [pkg,'info','-x',"'pkg(-devel)?$'",'>/dev/null', '2>&1']
+          execpipe = options[:execpipe] || Puppet::Util::Execution.method(:execpipe)
+          execpipe.call(cmd) { |pipe| pipe.each_line {} } # just ignore
+          @pkgng_active = true
+        rescue Puppet::ExecutionFailure
+        # nothing
+        end
+      end
+    else
+      ::Puppet.debug "'pkg' command not found"
+    end
+    ::Puppet.debug "pkgng is #{@pkgng_active ? '' : 'in'}active on this system"
+    @pkgng_active
+  end
 end
 end

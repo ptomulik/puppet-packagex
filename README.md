@@ -41,8 +41,8 @@ to it and its providers. Currently new features include:
     It provides following new features and bug-fixes:
     * *install_options* - extra CLI flags passed to *portupgrade* when
       installing, reinstalling and upgrading packages,
-    * *uninstall_options* - extra CLI flags passed to *pkg_deinstall* when
-      uninstalling packages,
+    * *uninstall_options* - extra CLI flags passed to *pkg_deinstall* (old
+      toolstack) or *pkg delete* (pkgng) when uninstalling packages,
     * *build_options* - configuration options for package,
     * *portorigin*s (instead of *portname*s) are used to identify package instances,
     * it's upgradeable (tested, the original puppet provider declared that it's
@@ -83,14 +83,14 @@ The [*portversion*](http://www.freebsd.org/cgi/man.cgi?query=portversion&manpath
 utility is used to find installed ports. It's better than using
 [*pkg_info*](http://www.freebsd.org/cgi/man.cgi?query=pkg_info&sektion=1) for
 several reasons. First, it is said to be faster, because it uses compiled
-version of ports INDEX file. Second, it works with both kinds of package
-databases - with the old *pkg* database and the new
+version of ports INDEX file. Second, it works with both - the old *pkg*
+database and the new
 [*pkgng*](http://www.freebsd.org/doc/handbook/pkgng-intro.html) database,
 providing seamless interface to any of them. Third, it provides package names
 and their "out-of-date" statuses in a single call, so we don't need to
-separatelly check out-of-date status for installed packages. While this version
-of *portsx* is not yet ready to work with *pkgng*, using *portversion* is a big
-step towards *pkgng* world.
+separatelly check out-of-date status for installed packages. This version of
+*portsx* works with old *pkg* database as well as with *pkgng*, using
+*portversion*.
 
 #### FreeBSD ports collection and its terminology
 
@@ -154,13 +154,21 @@ Sometimes freebsd refuses to uninstall a package due to dependency problems
 that would appear after deinstallation. In such situations we may use the
 `uninstall_options` to instruct the provider to (for example) uninstall also
 all packages that depend on the package being uninstalled. When using ports
-with old *pkg* package manager (the other is *pkgng* not covered here), one
-would write in its manifest:
+with old *pkg* package manager one would write in its manifest:
 
 ```puppet
 packagex { 'www/apache22':
   ensure => absent,
   uninstall_options => ['-r'] 
+}
+```
+
+For *pkgng* one has to write:
+
+```puppet
+packagex { 'www/apache22':
+  ensure => absent,
+  uninstall_options => ['-R','-y'] 
 }
 ```
 
@@ -191,7 +199,8 @@ Debug: Executing '/usr/local/sbin/portupgrade -N -P -M BATCH=yes www/apache22'
 ```
 
 Note, that the *portsx* provider adds some flags by its own (`-N` in the above
-example).
+example). What is added/removed is preciselly stated in provider's generated
+documentation.
 
 ## Usage
 
@@ -641,11 +650,6 @@ Note, that the *build_options* would never appear in output of the original
 
 ## Limitations
 
-* There is no support for *pkgng* yet, but it shall be relatively easy to add this
-  support. The only things to be adapted are the `uninstall` method in provider
-  class and the parts of code that determine `@property_hash[:build_options]`
-  (*pkgng* stores options in package database, so we don't have to parse
-  options files that may be out-of-sync with reality).
 * Currently there is no system tests for the new *portsx* provider. This is,
   because there are no FreeBSD prefab images provided by `rspec-system` yet. I
   hope this changes in not so far future, see status of the [request for freebsd

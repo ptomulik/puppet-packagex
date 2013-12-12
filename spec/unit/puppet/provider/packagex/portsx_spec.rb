@@ -198,8 +198,10 @@ describe provider_class do
       context "with installed packages=#{records.collect{|r| r.first[:pkgname]}.inspect}" do
         let(:records) { records }
         let(:output) { output }
+        let(:fields) { pkgrecord_class.default_fields }
         before(:each) do
-          described_class.stubs(:search_packages).once.with(nil).multiple_yields(*records)
+          described_class.stubs(:search_packages).once.with(nil,fields).multiple_yields(*records)
+          described_class.stubs(:pkgng_active?).returns(false)
         end
         (1..records.length-1).each do |i|
           record = records[i][0]
@@ -262,18 +264,20 @@ describe provider_class do
           ]
         }]]
       ] }
+      let(:fields) { pkgrecord_class.default_fields }
       it "prints warning but does not raises an error" do
-        described_class.stubs(:search_packages).once.with(nil).multiple_yields(*records)
-        described_class.stubs(:warning).once.with(
+        described_class.stubs(:search_packages).once.with(nil,fields).multiple_yields(*records)
+        described_class.stubs(:pkgng_active?).returns(false)
+        described_class.expects(:warning).once.with(
           "Found 2 installed ports named 'ruby-1.9.3.484,1': 'lang/ruby19', " +
           "'lang/ruby20'. Only 'lang/ruby20' will be ensured."
         )
-        expect { described_class.instances }.to_not raise_error
+        described_class.instances
       end
     end
 
     # No ports for an installed package.
-    context "when an installed package has multiple origins" do
+    context "when an installed package has no corresponding port" do
       let(:records) {[
         [pkgrecord_class[{
           :pkgname => 'ruby-1.8.7.123,1',
@@ -284,12 +288,36 @@ describe provider_class do
           :options => options_class[ ]
         }]],
       ] }
+      let(:fields) { pkgrecord_class.default_fields }
       it "prints warning but does not raise an error" do
-        described_class.stubs(:search_packages).once.with(nil).multiple_yields(*records)
-        described_class.stubs(:warning).once.with(
+        described_class.stubs(:search_packages).once.with(nil,fields).multiple_yields(*records)
+        described_class.stubs(:pkgng_active?).returns(false)
+        described_class.expects(:warning).once.with(
           "Could not find port for installed package 'ruby-1.8.7.123,1'." +
           "Build options and upgrades will not work for this package."
         )
+        described_class.instances
+      end
+    end
+
+    context "when pkgng is active" do
+      let(:records) {[
+        [pkgrecord_class[{
+          :pkgname => 'ruby-1.8.7.123,1',
+          :portname => 'ruby',
+          :pkgversion => '1.8.7.123,1',
+          :portstatus => '=',
+          :portinfo => 'up-to-date-with-port',
+          :options => options_class[ ],
+          :portorigin => 'lang/ruby19'
+        }]]
+      ] }
+      let(:fields) { pkgrecord_class.default_fields - [:options] }
+      it do
+        described_class.stubs(:search_packages).once.with(nil,fields).multiple_yields(*records)
+        described_class.stubs(:pkgng_active?).returns(true)
+        described_class.stubs(:command).once.with(:pkg).returns('/a/path/to/pkg')
+        options_class.stubs(:query_pkgng).once.with('%o',nil,{:pkg => '/a/path/to/pkg'}).returns({'lang/ruby19' => options_class[:FOO => true]})
         expect { described_class.instances }.to_not raise_error
       end
     end
@@ -630,9 +658,19 @@ describe provider_class do
   end
 
   describe "#uninstall_options" do
-    it do
-      subject.stubs(:resource).once.returns({:uninstall_options => %w{-x}})
-      subject.uninstall_options.should == %w{-x}
+    context "when pkgng_active? is true" do
+      it do
+        subject.stubs(:pkgng_active?).returns(true)
+        subject.stubs(:resource).once.returns({:uninstall_options => %w{-x}})
+        subject.uninstall_options.should == %w{delete -x}
+      end
+    end
+    context "when pkgng_active? is false" do
+      it do
+        subject.stubs(:pkgng_active?).returns(false)
+        subject.stubs(:resource).once.returns({:uninstall_options => %w{-x}})
+        subject.uninstall_options.should == %w{-x}
+      end
     end
   end
 
@@ -759,11 +797,25 @@ describe provider_class do
   end
 
   describe "when uninstalling" do
-    it do
-      subject.stubs(:pkgname).returns('foo-1.2.3')
-      subject.stubs(:uninstall_options).returns(%w{-x})
-      subject.stubs(:portuninstall).with(*%w{-x foo-1.2.3})
-      expect { subject.uninstall }.to_not raise_error
+    context "package foo-1.2.3 with uninstall_options=['-x']" do
+      before(:each) do
+        subject.stubs(:pkgname).returns('foo-1.2.3')
+        subject.stubs(:resource).returns({:uninstall_options => %w{-x}})
+      end
+      context "and pkgng is inactive" do
+        it "should call #portuninstall('-x','foo-1.2.3') once" do
+          subject.stubs(:pkgng_active?).returns(false)
+          subject.expects(:portuninstall).once.with(*%w{-x foo-1.2.3})
+          subject.uninstall
+        end
+      end
+      context "and pkgng is active" do
+        it "should call #portuninstall('delete','-x','foo-1.2.3') once" do
+          subject.stubs(:pkgng_active?).returns(true)
+          subject.expects(:portuninstall).once.with(*%w{delete -x foo-1.2.3})
+          subject.uninstall
+        end
+      end
     end
   end
 

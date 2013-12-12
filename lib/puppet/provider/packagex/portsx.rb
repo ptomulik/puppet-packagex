@@ -8,18 +8,23 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
   desc "Support for FreeBSD's ports. Note that this, too, mixes packages and ports.
 
   `install_options` are passed to `portupgrade` command when installing,
-  reinstalling or upgrading packages. You shall include `['-M','BATCH=yes']` in
-  almost all cases when providing `install_options` by your own. Some CLI flags
+  reinstalling or upgrading packages. You should always include
+  `['-M','BATCH=yes']` options in your custom `install_options`. Some CLI flags
   are prepended internally to CLI and some flags given by user are internally
   removed when performing install, reinstall or upgrade actions.  Install
   always prepends `-N` and removes `-R` and `-f` if provided by user. Reinstall
   always prepends `-f` and removes `-N` flag if present. Upgrade always removes
   `-N` and `-f` if present in install_options.
 
-  `uninstall_options` are passed to pkg_deinstall command when package gets
-  uninstalled (for pkg package database). Probably the most commonly used
-  uninstall option is the `-r` option which uninstalls recursively all packages
-  that depend on the one being uninstalled.
+  `uninstall_options` are passed to uninstall command. When the target system
+  uses (old) `pkg_xxx` tools to manage packages, these options are passed to
+  `pkg_deinstall` command. When the target system uses `pkgng` tools, then
+  `uninstall_options` are passed to `pkg` command. If you define custom options
+  for `pkg` (pkgng toolstack), you should always include the `-y` option (see
+  pkg-delete(8) for details). Typical use case for `uninstall_options` is
+  uninstalling packages recursively, that is uninstalling a package and all the
+  other packages depending on this one. For `pkg_deinstall` the `%w{-r}` does
+  the job and for `pkgng` it's achieved with `%w{-y -R}`.
 
   `build_options` shall be a hash with port's option names as keys (all
   uppercase) and boolean values. This parameter defines options that you would
@@ -38,9 +43,30 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
   with these provided in puppet manifests, the package gets reinstalled with
   the options defined in puppet manifests.
   "
+  require 'puppet/util/ptomulik/packagex/portsx'
+  require 'puppet/util/ptomulik/packagex/portsx/options'
+  extend Puppet::Util::PTomulik::Packagex::Portsx
+
+  # Default options for {#install} method.
+  self::DEFAULT_INSTALL_OPTIONS = %w{-N -M BATCH=yes}
+  # Default options for {#reinstall} method.
+  self::DEFAULT_REINSTALL_OPTIONS = %w{-r -f -M BATCH=yes}
+  # Default options for {#update} method.
+  self::DEFAULT_UPGRADE_OPTIONS = %w{-R -M BATCH=yes}
+
+  # Detect whether the OS uses old pkg or the new pkgng.
+  if pkgng_active? :pkg => '/usr/local/sbin/pkg'
+    commands :portuninstall => '/usr/local/sbin/pkg',
+             :pkg => '/usr/local/sbin/pkg'
+    self::DEFAULT_UNINSTALL_OPTIONS =  %w{-y}
+  else
+    commands :portuninstall => '/usr/local/sbin/pkg_deinstall'
+    self::DEFAULT_UNINSTALL_OPTIONS =  %w{}
+  end
+  debug "Selecting '#{command(:portuninstall)}' command as package uninstaller"
+
   commands :portupgrade   => "/usr/local/sbin/portupgrade",
            :portversion   => "/usr/local/sbin/portversion",
-           :portuninstall => "/usr/local/sbin/pkg_deinstall",
            :make          => "/usr/bin/make"
 
   defaultfor :operatingsystem => :freebsd
@@ -53,18 +79,29 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
     ENV.delete(var) if ENV.include?(var)
   end
 
-  require 'puppet/util/ptomulik/packagex/portsx'
-  require 'puppet/util/ptomulik/packagex/portsx/options'
-  extend Puppet::Util::PTomulik::Packagex::Portsx
-
   # note, portsdir and port_dbdir are defined in module
-  # Puppet::Util::PTomulik::Packagex::Portsx
-  confine :exists => [ self.portsdir, self.port_dbdir ]
+  # Puppet::Util::PTomulik::Packagex::Portsx::Functions
+  confine :exists => [ portsdir, port_dbdir ]
+
+  def pkgng_active?
+    self.class.pkgng_active?
+  end
 
   def self.instances(names=nil)
+    fields = Puppet::Util::PTomulik::Packagex::Portsx::PkgRecord.default_fields
+    options = if pkgng_active?
+      # here, with pkgng we have more reliable and efficient way to retrieve
+      # build options
+      fields -= [:options]
+      options_class = Puppet::Util::PTomulik::Packagex::Portsx::Options
+      options_class.query_pkgng('%o',nil,{:pkg => command(:pkg)})
+    else
+      {}
+    end
+
     records = {}
     # find installed packages
-    search_packages(names) do |record|
+    search_packages(names,fields) do |record|
       records[record[:pkgname]] ||= Array.new
       records[record[:pkgname]] << record
     end
@@ -82,7 +119,7 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
       package = new({
         :name => record[:portorigin] || record[:pkgname],
         :ensure => record[:pkgversion],
-        :build_options => record[:options],
+        :build_options => options[record[:portorigin]] || record[:options] || {},
         :provider => self.name
       })
       package.assign_port_attributes(record)
@@ -242,15 +279,6 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
   end
   private :revert_build_options
 
-  # Default options for {#install} method.
-  self::DEFAULT_INSTALL_OPTIONS = %w{-N -M BATCH=yes}
-  # Default options for {#reinstall} method.
-  self::DEFAULT_REINSTALL_OPTIONS = %w{-r -f -M BATCH=yes}
-  # Default options for {#update} method.
-  self::DEFAULT_UPGRADE_OPTIONS = %w{-R -M BATCH=yes}
-  # Default options for {#uninstall} method.
-  self::DEFAULT_UNINSTALL_OPTIONS =  %w{}
-
   # Return portupgrade's CLI options for use within the {#install} method.
   def install_options
     # In an ideal world we would have all these parameters independent:
@@ -294,8 +322,13 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
 
   # Return portuninstall's CLI options for use within the {#uninstall} method.
   def uninstall_options
+    # For pkgng we always prepend the 'delete' command to options.
     ops = resource[:uninstall_options]
-    prepare_options(ops, self.class::DEFAULT_UNINSTALL_OPTIONS)
+    if pkgng_active?
+      prepare_options(ops, self.class::DEFAULT_UNINSTALL_OPTIONS, %w{delete})
+    else
+      prepare_options(ops, self.class::DEFAULT_UNINSTALL_OPTIONS)
+    end
   end
 
   # Prepare options for install, reinstall, upgrade and uninstall methods.

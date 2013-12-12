@@ -115,6 +115,39 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Options do
 
   end
 
+  describe "#query_pkgng(key,packages=nil,params={})" do
+    context "#query_pkgng('%o',nil)" do
+      let(:cmd) { ['pkg', 'query', "'%o %Ok %Ov'"] }
+      it do
+        Puppet::Util::Execution.stubs(:execpipe).once.with(cmd).yields([
+          "origin/foo FOO on",
+          "origin/foo BAR off",
+          "origin/bar FOO off",
+          "origin/bar BAR on"
+        ].join("\n"))
+        described_class.query_pkgng('%o',nil).should == {
+          'origin/foo' => described_class[{ :FOO => true, :BAR => false }],
+          'origin/bar' => described_class[{ :FOO => false, :BAR => true }]
+        }
+      end
+    end
+    context "#query_pkgng('%o',['foo','bar'])" do
+      let(:cmd) { ['pkg', 'query', "'%o %Ok %Ov'", 'foo', 'bar'] }
+      it do
+        Puppet::Util::Execution.stubs(:execpipe).once.with(cmd).yields([
+          "origin/foo FOO on",
+          "origin/foo BAR off",
+          "origin/bar FOO off",
+          "origin/bar BAR on"
+        ].join("\n"))
+        described_class.query_pkgng('%o',['foo','bar']).should == {
+          'origin/foo' => described_class[{ :FOO => true, :BAR => false }],
+          'origin/bar' => described_class[{ :FOO => false, :BAR => true }]
+        }
+      end
+    end
+  end
+
   describe "#generate(params)" do
     [
       # 1.

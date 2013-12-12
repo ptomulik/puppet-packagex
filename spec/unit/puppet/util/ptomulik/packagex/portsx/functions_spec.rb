@@ -325,4 +325,68 @@ describe Puppet::Util::PTomulik::Packagex::Portsx::Functions do
     end
   end
 
+  describe "#pkgng_active?" do
+    pkg = '/a/pkg/path'
+    env = { 'TMPDIR' => '/dev/null', 'ASSUME_ALWAYS_YES' => '1',
+            'PACKAGESITE' => 'file:///nonexistent' }
+    cmd = [pkg,'info','-x',"'pkg(-devel)?$'",'>/dev/null', '2>&1']
+    context "when pkg command does not exist" do
+      before(:each) do
+        FileTest.stubs(:file?).with(pkg).returns(false)
+        FileTest.stubs(:executable?).with(pkg).returns(false)
+      end
+      let(:pkg) { pkg }
+      it { test_class.pkgng_active?({:pkg => pkg}).should == false }
+      it "should print appropriate debug messages" do
+        ::Puppet.expects(:debug).once.with("'pkg' command not found")
+        ::Puppet.expects(:debug).once.with("pkgng is inactive on this system")
+        test_class.pkgng_active?({:pkg => pkg})
+      end
+      it "@pkgng_active should be false after pkgng_active?" do
+        test_class.pkgng_active?({:pkg => pkg})
+        test_class.instance_variable_get(:@pkgng_active).should be_false
+      end
+    end
+    context "when pkg command exists but pkgng database is not initialized" do
+      before(:each) do
+        FileTest.stubs(:file?).with(pkg).returns(true)
+        FileTest.stubs(:executable?).with(pkg).returns(true)
+        Puppet::Util.stubs(:withenv).once.with(env).yields
+        Puppet::Util::Execution.stubs(:execpipe).once.with(cmd).raises(Puppet::ExecutionFailure,"")
+      end
+      let(:pkg) { pkg }
+      it { expect { test_class.pkgng_active?({:pkg => pkg}) }.to_not raise_error }
+      it { test_class.pkgng_active?({:pkg => pkg}).should == false }
+      it "should print appropriate debug messages" do
+        ::Puppet.expects(:debug).once.with("'#{pkg}' command found, checking whether pkgng is active")
+        ::Puppet.expects(:debug).once.with("pkgng is inactive on this system")
+        test_class.pkgng_active?({:pkg => pkg})
+      end
+      it "@pkgng_active should be false after pkgng_active?" do
+        test_class.pkgng_active?({:pkg => pkg})
+        test_class.instance_variable_get(:@pkgng_active).should be_false
+      end
+    end
+    context "when pkg command exists and pkgng database is initialized" do
+      before(:each) do
+        FileTest.stubs(:file?).with(pkg).returns(true)
+        FileTest.stubs(:executable?).with(pkg).returns(true)
+        Puppet::Util.stubs(:withenv).once.with(env).yields
+        Puppet::Util::Execution.stubs(:execpipe).once.with(cmd).yields('')
+      end
+      let(:pkg) { pkg }
+      it { expect { test_class.pkgng_active?({:pkg => pkg}) }.to_not raise_error }
+      it { test_class.pkgng_active?({:pkg => pkg}).should == true }
+      it "should print appropriate debug messages" do
+        ::Puppet.expects(:debug).once.with("'#{pkg}' command found, checking whether pkgng is active")
+        ::Puppet.expects(:debug).once.with("pkgng is active on this system")
+        test_class.pkgng_active?({:pkg => pkg})
+      end
+      it "@pkgng_active should be true after pkgng_active?" do
+        test_class.pkgng_active?({:pkg => pkg})
+        test_class.instance_variable_get(:@pkgng_active).should be_true
+      end
+    end
+  end
+
 end
