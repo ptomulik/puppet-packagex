@@ -37,11 +37,12 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
       }
 
   The options are written to `/var/db/ports/*/options.local` files (one file
-  per package). They are synchronized with what is found in
-  `/var/db/ports/*/options{,.local}` files (possibly several files files per
-  package). If the build_options of already installed packages are out of sync
-  with these provided in puppet manifests, the package gets reinstalled with
-  the options defined in puppet manifests.
+  per package). For old `pkg_xxx` toolstack they are synchronized with what is
+  found in `/var/db/ports/*/options{,.local}` files (possibly several files
+  files per package). For the new `pkgng` system, they're synchronized with
+  options returned by `pkg query`. If `build_options` of an already installed
+  package are out of sync with the ones prescribed in puppet manifests, the
+  package gets reinstalled with the options taken from puppet manifests.
   "
   require 'puppet/util/ptomulik/packagex/portsx'
   require 'puppet/util/ptomulik/packagex/portsx/options'
