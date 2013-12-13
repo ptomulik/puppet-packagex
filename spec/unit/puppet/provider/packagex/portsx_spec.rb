@@ -276,6 +276,28 @@ describe provider_class do
       end
     end
 
+    context "::instances(['ruby'])" do
+      let(:records) {[
+        [['ruby',pkgrecord_class[{
+          :pkgname => 'ruby-1.8.7.123,1',
+          :portname => 'ruby',
+          :pkgversion => '1.8.7.123,1',
+          :portstatus => '=',
+          :portinfo => 'up-to-date-with-port',
+          :options => options_class[ ],
+          :portorigin => 'lang/ruby19'
+        }]]]
+      ] }
+      let(:fields) { pkgrecord_class.default_fields }
+      it do
+        described_class.stubs(:search_packages).once.with(['ruby'],fields).multiple_yields(*records)
+        described_class.stubs(:pkgng_active?).returns(false)
+#        described_class.stubs(:command).once.with(:pkg).returns('/a/path/to/pkg')
+#        options_class.stubs(:query_pkgng).once.with('%o',nil,{:pkg => '/a/path/to/pkg'}).returns({'lang/ruby19' => options_class[:FOO => true]})
+        expect { described_class.instances(['ruby']) }.to_not raise_error
+      end
+    end
+
     # No ports for an installed package.
     context "when an installed package has no corresponding port" do
       let(:records) {[

@@ -89,6 +89,9 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
   end
 
   def self.instances(names=nil)
+    split_record = names ? lambda{|r| [r[1][:pkgname],r[1]]} :
+                           lambda{|r| [r[:pkgname], r]}
+
     fields = Puppet::Util::PTomulik::Packagex::Portsx::PkgRecord.default_fields
     options = if pkgng_active?
       # here, with pkgng we have more reliable and efficient way to retrieve
@@ -103,8 +106,9 @@ Puppet::Type.type(:packagex).provide :portsx, :parent => :freebsd, :source => :f
     records = {}
     # find installed packages
     search_packages(names,fields) do |record|
-      records[record[:pkgname]] ||= Array.new
-      records[record[:pkgname]] << record
+      name, record = split_record.call(record)
+      records[name] ||= Array.new
+      records[name] << record
     end
     # create provider instances
     packages = []
