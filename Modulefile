@@ -1,5 +1,5 @@
 name    'ptomulik-packagex'
-version '0.2.0'
+version '0.2.1'
 source 'git://github.com/ptomulik/puppet-packagex.git'
 author 'ptomulik'
 license 'Apache License, Version 2.0'

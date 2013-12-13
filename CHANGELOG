@@ -1,3 +1,7 @@
+2013-12-13 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+  * release 0.2.1
+  * applied some erratas to README.md
+  * fixed issue from Github PR #1
 2013-12-12 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
   * release 0.2.0
   * added support for pkgng
