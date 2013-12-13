@@ -554,6 +554,15 @@ Note, that the *build_options* would never appear in output of the original
 
 ## Limitations
 
+* If there are several ports installed with same *portname* - for example
+  `docbook` - then `puppet resource packagex docbook` will list only one of
+  them (the last one from `portversion`s list - usually the most recent). It is
+  so, because `portsx` uses *portorigins* to identify its instances (as `name`
+  paramateter). None of the existing `instances` is identified by `puppet` as
+  an instance of `docbook` and `puppet` falls back to use provider's `query`
+  method. But `query` handles only one package per name (in this case the last
+  one from *portversion*'s list if chosen). This is an issue, which will not
+  probably be fixed, so you're encouraged to use *portorigins*.
 * Currently there is no system tests for the new *portsx* provider. This is,
   because there are no FreeBSD prefab images provided by `rspec-system` yet. I
   hope this changes in not so far future, see status of the [request for freebsd
