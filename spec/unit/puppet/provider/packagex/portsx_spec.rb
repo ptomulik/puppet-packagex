@@ -292,8 +292,6 @@ describe provider_class do
       it do
         described_class.stubs(:search_packages).once.with(['ruby'],fields).multiple_yields(*records)
         described_class.stubs(:pkgng_active?).returns(false)
-#        described_class.stubs(:command).once.with(:pkg).returns('/a/path/to/pkg')
-#        options_class.stubs(:query_pkgng).once.with('%o',nil,{:pkg => '/a/path/to/pkg'}).returns({'lang/ruby19' => options_class[:FOO => true]})
         expect { described_class.instances(['ruby']) }.to_not raise_error
       end
     end
