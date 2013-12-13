@@ -48,6 +48,9 @@ module PkgSearch
   def search_packages_1(names, fields, options)
     merge = names ? lambda {|r1,r2| r1[1].merge!(r2[1]) } :
                     lambda {|r1,r2| r1.merge!(r2) }
+    # sometimes we have to call portversion twice (perform two passes),
+    # pass1 and pass2 contain arguments for search_packages_2 for the first
+    # and second pass respectivelly
     pass1, pass2 = if fields.include?(:portorigin)
       if (fields & [:pkgname, :portname]).empty?
         [ [ %w{-v -o}, [:portorigin, :portstatus, :portinfo] ], nil ]
