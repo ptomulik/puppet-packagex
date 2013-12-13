@@ -277,156 +277,60 @@ The old *ports* provider simply says `y` here and installs first proposed port.
 
 #### Package resources are not properly listed with `puppet resource package` command
 
-The test case is following (2013.11.30):
+The test case is following (2013.12.13):
 
-* two ports `lang/ruby18` and `lang/ruby19` sharing common *portname* `ruby`
-  are initially installed,
-* `vim-lite` package is initially installed,
-* some other ports are installed, especially those containing ruby gems,
+* several ports with portname `docbook.*` are installed at the same time,
 
-Comparing length of package lists from several commands suggests that something
-goes wrong with `puppet resource package` for *ports* provider:
+Running portversion yields:
 
 ```console
-~ # portversion | wc -l
-      56
-~ # pkg_info | wc -l
-      56
-~ # puppet resource package | grep '^package {' | wc -l
-      61
+~ # portversion -Q -o 2>/dev/null | grep docbook
+textproc/docbook
+textproc/docbook-410
+textproc/docbook-420
+textproc/docbook-430
+textproc/docbook-440
+textproc/docbook-450
+textproc/docbook-500
+textproc/docbook-sk
+textproc/docbook-xml
+textproc/docbook-xml-430
+textproc/docbook-xml-440
+textproc/docbook-xml-450
+textproc/docbook-xsl
 ```
 
-Running diff on package lists:
+whereas running `puppet resource package`:
 
 ```console
-~ # portversion -Q > /tmp/list1
-~ # puppet resource package | grep package | awk -F "[ :']+" '{print $3}' > /tmp/list2
-~ # diff -u /tmp/list1 /tmp/list2
---- /tmp/list1  2013-12-01 01:20:10.000000000 +0100
-+++ /tmp/list2  2013-12-01 01:20:14.000000000 +0100
-@@ -8,6 +8,7 @@
- automake-wrapper
- console
- bison
-+bzip2-ruby
- cloc
- cmake
- cmake-modules
-@@ -15,14 +16,18 @@
- db42
- dialog4ports
- dmidecode
-+editors/vim-lite
- expat
- f2c
-+facter
- fpp
- gdbm
- gettext
- gmake
- hello
- help2man
-+hiera
-+json_pure
- libexecinfo
- libffi
- libiconv
-@@ -42,7 +47,7 @@
- portupgrade
- puppet
- ruby
--ruby
-+ruby-augeas
- ruby19-bdb
- ruby19-date2
- ruby19-gems
-```
-
-Now investigating particular packages from the list above reveals
-inconsistencies in detail:
-
-```console
-~ # puppet resource package | grep '^package {' | grep 'bzip2-ruby'
-package { 'bzip2-ruby':
-~ # portversion -v 'bzip2-ruby'
-** No matching package found: bzip2-ruby
-```
-
-```console
-~ # puppet resource package | grep '^package {' | grep 'vim-lite'
-package { 'editors/vim-lite':
-package { 'vim-lite':
-~ # portversion -v -o vim-lite
-editors/vim-lite            =  up-to-date with port
-```
-
-```console
-~ # puppet resource package | grep '^package {' | grep 'facter'
-package { 'facter':
-package { 'rubygem-facter':
-~ # portversion -v -o facter
-** No matching package found: facter
-~ # portversion -v -o rubygem-facter
-sysutils/rubygem-facter     =  up-to-date with port
-```
-
-```console
-~ # puppet resource package | grep '^package {' | grep 'hiera'
-package { 'hiera':
-package { 'rubygem-hiera':
-~ # portversion -v hiera
-** No matching package found: hiera
-~ # portversion -v rubygem-hiera
-rubygem-hiera-1.1.2         =  up-to-date with port
-```
-
-```console
-~ # puppet resource package | grep '^package {' | grep 'json_pure'
-package { 'json_pure':
-package { 'rubygem-json_pure':
-~ # portversion -v -o json_pure
-** No matching package found: json_pure
-~ # portversion -v -o rubygem-json_pure
-devel/rubygem-json_pure     =  up-to-date with port
-```
-
-```console
-~ # puppet resource package | grep '^package {' | grep "'ruby'"
-package { 'ruby':
-~ # portversion -v -o ruby
-lang/ruby18                 =  up-to-date with port
-lang/ruby19                 =  up-to-date with port
-```
-
-```console
-~ # puppet resource package | grep '^package {' | grep 'ruby-augeas'
-package { 'ruby-augeas':
-package { 'rubygem-ruby-augeas':
-~ # portversion -v -o ruby-augeas
-** No matching package found: ruby-augeas
-~ # portversion -v -o rubygem-ruby-augeas
-textproc/rubygem-augeas     =  up-to-date with port
+~ # puppet resource package | grep '^package {' | grep  docbook
+package { 'docbook':
+package { 'docbook-sk':
+package { 'docbook-xml':
+package { 'docbook-xsl':
 ```
 
 The same case, but with the new *portsx* provider yields:
 
 ```console
-~ # portversion | wc -l
-      56
-~ # pkg_info | wc -l
-      56
-~ # puppet resource packagex | grep 'packagex {' | wc -l
-      56
-```
-
-```console
-~ # portversion -Q -o | sort > /tmp/list1
-~ # puppet resource packagex | grep packagex | awk -F "[ :']+" '{print $3}' | sort > /tmp/list2
-~ # diff -u /tmp/list1 /tmp/list2
+~ # puppet resource packagex | grep '^packagex {' | grep  docbook
+packagex { 'textproc/docbook':
+packagex { 'textproc/docbook-410':
+packagex { 'textproc/docbook-420':
+packagex { 'textproc/docbook-430':
+packagex { 'textproc/docbook-440':
+packagex { 'textproc/docbook-450':
+packagex { 'textproc/docbook-500':
+packagex { 'textproc/docbook-sk':
+packagex { 'textproc/docbook-xml':
+packagex { 'textproc/docbook-xml-430':
+packagex { 'textproc/docbook-xml-440':
+packagex { 'textproc/docbook-xml-450':
+packagex { 'textproc/docbook-xsl':
 ```
 
 that is the information from the new *portsx* provider agrees with that
-obtained from operating system.
+obtained from package manager.
 
 #### With `ensure => latest` packages are not upgraded
 
