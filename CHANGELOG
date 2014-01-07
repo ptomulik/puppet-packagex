@@ -1,3 +1,7 @@
+2014-01-07 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+  * added build-module.sh script
+2013-01-04 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+  * fixed dependencies in spec_helper_system.rb.
 2013-12-13 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
   * release 0.2.1
   * applied some erratas to README.md

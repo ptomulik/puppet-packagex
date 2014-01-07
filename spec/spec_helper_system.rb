@@ -22,9 +22,6 @@ RSpec.configure do |c|
 
     # Install modules and dependencies
     puppet_module_install(:source => proj_root, :module_name => 'packagex')
-#    shell('puppet module install ptomulik-ptlib')
-#    shell('puppet module install ptomulik-repoutil')
-    shell('puppet module install ptomulik-bsdportconfig')
-    shell('puppte module install ptomulik-vash')
+    shell('puppet module install ptomulik-vash')
   end
 end
