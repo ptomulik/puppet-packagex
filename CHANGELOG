@@ -1,4 +1,5 @@
 2014-01-07 Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+  * release 0.2.3
   * fixed dependencies in Modulefile
   * transitioned to virtual module
   * release 0.2.2
